@@ -1,0 +1,5 @@
+{
+  "name": "RAG Explorer & SQL Visualizer",
+  "description": "An educational tool to visualize the Retrieval-Augmented Generation (RAG) pipeline and Text-to-SQL workflows, featuring step-by-step animations and code insights.",
+  "requestFramePermissions": []
+}
