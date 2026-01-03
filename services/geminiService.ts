@@ -12,13 +12,14 @@ export class GeminiService {
     // Formatting context with IDs for citation
     const context = chunks.map(c => `[Chunk #${c.id}]\n${c.text}`).join('\n\n---\n\n');
     
-    const prompt = `SYSTEM: You are a strict RAG (Retrieval-Augmented Generation) assistant. 
-Your task is to answer the user's question using ONLY the provided document context below. 
+    const prompt = `SYSTEM: You are a helpful RAG (Retrieval-Augmented Generation) assistant. 
+Your task is to answer the user's question using the provided document context below.
 
 GROUNDING RULES:
-1. If the answer is not contained within the provided context, say: "I'm sorry, but this information is not available in the uploaded document."
-2. Do NOT use outside knowledge.
-3. You MUST cite the Chunk ID (e.g., [Chunk #1]) at the end of every sentence or paragraph where you use information from that specific chunk.
+1. Use the provided context to answer. If the context is partially relevant, provide the best possible answer from it.
+2. If the answer is absolutely not in the context, politely state that the information isn't available in the document.
+3. You MUST cite the Chunk ID (e.g., [Chunk #1]) for every piece of information used. Put the citation at the end of the sentence.
+4. Keep the tone professional and concise.
 
 CONTEXT:
 ${context}
@@ -31,7 +32,7 @@ ${query}`;
       contents: prompt,
     });
     
-    return response.text || "No response generated.";
+    return response.text || "I was unable to synthesize a response from the document.";
   }
 
   async textToSql(query: string, schema: string): Promise<{ sql: string, explanation: string }> {
