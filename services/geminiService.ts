@@ -2,22 +2,35 @@
 import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
 
 export class GeminiService {
-  // Use process.env.API_KEY directly as per guidelines
   private getClient() {
     return new GoogleGenAI({ apiKey: process.env.API_KEY });
   }
 
-  async askWithContext(query: string, chunks: string[]): Promise<string> {
+  async askWithContext(query: string, chunks: {id: string, text: string}[]): Promise<string> {
     const ai = this.getClient();
-    const context = chunks.join('\n\n');
-    const prompt = `Use the following context to answer the query. If the answer isn't in the context, say you don't know.\n\nContext:\n${context}\n\nQuery: ${query}`;
+    
+    // Formatting context with IDs for citation
+    const context = chunks.map(c => `[Chunk #${c.id}]\n${c.text}`).join('\n\n---\n\n');
+    
+    const prompt = `SYSTEM: You are a strict RAG (Retrieval-Augmented Generation) assistant. 
+Your task is to answer the user's question using ONLY the provided document context below. 
+
+GROUNDING RULES:
+1. If the answer is not contained within the provided context, say: "I'm sorry, but this information is not available in the uploaded document."
+2. Do NOT use outside knowledge.
+3. You MUST cite the Chunk ID (e.g., [Chunk #1]) at the end of every sentence or paragraph where you use information from that specific chunk.
+
+CONTEXT:
+${context}
+
+USER QUESTION: 
+${query}`;
     
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: prompt,
     });
     
-    // .text is a property, not a method
     return response.text || "No response generated.";
   }
 
