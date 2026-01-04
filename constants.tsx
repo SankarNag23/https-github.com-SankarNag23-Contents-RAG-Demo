@@ -51,6 +51,23 @@ retrieved_docs = db.similarity_search_with_relevance_scores(
     score_threshold=0.8
 )`,
 
+  AGENTIC: `from langchain.agents import AgentExecutor, create_openai_functions_agent
+from langchain.tools.retriever import create_retriever_tool
+
+# 1. Define RAG as a tool the Agent can choose to call
+tool = create_retriever_tool(
+    retriever, 
+    "doc_search", 
+    "Searches and returns chunks from the guidelines."
+)
+
+# 2. Agent decides when to search based on user intent
+agent = create_openai_functions_agent(llm, [tool], prompt)
+executor = AgentExecutor(agent=agent, tools=[tool], verbose=True)
+
+# 3. Execution Loop: Think -> Act -> Observe
+response = executor.invoke({"input": "Is Rule 2 violated by 512 dims?"})`,
+
   SQL_GEN: `from langchain.chains import create_sql_query_chain
 
 # System leverages RAG-retrieved Schema context to generate SQL

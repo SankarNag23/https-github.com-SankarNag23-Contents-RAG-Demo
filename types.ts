@@ -1,6 +1,7 @@
 
 export enum AppMode {
   DOCUMENT_RAG = 'DOCUMENT_RAG',
+  AGENTIC_RAG = 'AGENTIC_RAG',
   TEXT_TO_SQL = 'TEXT_TO_SQL'
 }
 
@@ -12,6 +13,15 @@ export enum RagStep {
   STORING = 'STORING',
   RETRIEVING = 'RETRIEVING',
   GENERATING = 'GENERATING'
+}
+
+export enum AgentStep {
+  IDLE = 'IDLE',
+  ANALYZING_TASK = 'ANALYZING_TASK',
+  PLANNING = 'PLANNING',
+  TOOL_EXECUTION = 'TOOL_EXECUTION',
+  REASONING = 'REASONING',
+  SYNTHESIZING = 'SYNTHESIZING'
 }
 
 export enum SqlStep {
