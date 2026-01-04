@@ -74,6 +74,7 @@ const App: React.FC = () => {
   
   // SQL State
   const [sqlResult, setSqlResult] = useState<{ sql: string; explanation: string; results: any[] } | null>(null);
+  const sqlResultRef = useRef<{ sql: string; explanation: string; results: any[] } | null>(null);
 
   const processingRef = useRef(false);
 
@@ -125,20 +126,25 @@ const App: React.FC = () => {
       if (targetStep === SqlStep.PARSING) {
         setSqlStep(SqlStep.PARSING);
         setSqlResult(null);
+        sqlResultRef.current = null;
         await delay(1200);
       }
       else if (targetStep === SqlStep.GENERATING_SQL) {
         setSqlStep(SqlStep.GENERATING_SQL);
         const activeQuery = query.trim() || "Show me revenue by region for 2024.";
         const res = await gemini.textToSql(activeQuery, JSON.stringify(MOCK_DB_SCHEMA));
-        setSqlResult(prev => ({ ...res, results: [] }));
+        const newResult = { ...res, results: [] };
+        sqlResultRef.current = newResult;
+        setSqlResult(newResult);
         await delay(1200);
       }
       else if (targetStep === SqlStep.EXECUTING) {
         setSqlStep(SqlStep.EXECUTING);
-        if (sqlResult) {
-          const results = await gemini.simulateDatabaseQuery(sqlResult.sql);
-          setSqlResult(prev => prev ? { ...prev, results } : null);
+        if (sqlResultRef.current) {
+          const results = await gemini.simulateDatabaseQuery(sqlResultRef.current.sql);
+          const updatedResult = { ...sqlResultRef.current, results };
+          sqlResultRef.current = updatedResult;
+          setSqlResult(updatedResult);
         }
         await delay(1500);
       }
@@ -160,6 +166,7 @@ const App: React.FC = () => {
       if (current === SqlStep.ANSWERING) {
         setSqlStep(SqlStep.IDLE);
         setSqlResult(null);
+        sqlResultRef.current = null;
         current = SqlStep.IDLE;
       }
       let keepGoing = true;
@@ -364,6 +371,7 @@ const App: React.FC = () => {
     setAnswer('');
     setThoughts([]);
     setSqlResult(null);
+    sqlResultRef.current = null;
     setFileName('');
     setFileContent('');
     setIsAutoMode(false);
